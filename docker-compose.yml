@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  discord-audio-bot:
+    build: .
+    container_name: discord-audio-bot
+    restart: unless-stopped
+    
+    # Environment variables
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - SHAIRPORT_PIPE_PATH=/tmp/shairport-sync-audio
+    
+    # Network mode for AirPlay discovery
+    network_mode: host
+    
+    # Volumes for persistence (simplified)
+    volumes:
+      - ./logs:/app/logs
+    
+    # Capabilities for audio and network services
+    cap_add:
+      - SYS_NICE
+      - NET_ADMIN
+      - NET_RAW
+    
+    # Privileged mode for Avahi daemon
+    privileged: true
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "python3 main.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
